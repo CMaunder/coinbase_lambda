@@ -7,6 +7,8 @@ import os
 from enum import Enum
 import uuid
 
+import stubbed_data
+
 
 class Sides(Enum):
     SELL = 'SELL'
@@ -35,7 +37,7 @@ class CoinbaseService:
     def __init__(self):
         self.base_path = "/api/v3/brokerage/"
 
-    def make_signed_request(self, method, category, body):
+    def _make_signed_request(self, method, category, body):
         path = self.base_path + category
         unix_timestamp = str(int(time.time()))
         message = str(unix_timestamp) + method + path.split('?')[0] + str(body)
@@ -49,21 +51,18 @@ class CoinbaseService:
             'CB-ACCESS-TIMESTAMP': unix_timestamp,
         }
         conn.request(method, path, body, headers)
-        print('made request')
         res = conn.getresponse()
-        data = res.read()
-        return data.decode("utf-8")
+        data = res.read().decode("utf-8")
+        return json.loads(data)
 
     def list_accounts(self):
-        account_data = self.make_signed_request(Methods.GET.value, APICategories.ACCOUNTS.value, '')
-        return json.loads(account_data)
+        return self._make_signed_request(Methods.GET.value, APICategories.ACCOUNTS.value, '')
 
     def list_accounts_by_product_quantity(self):
         return sorted(self.list_accounts().get('accounts'), key=lambda x: x['available_balance']["value"], reverse=True)
 
     def list_orders(self):
-        order_data = self.make_signed_request(Methods.GET.value, APICategories.ORDERS.value + '/historical/batch', '')
-        return json.loads(order_data)
+        return self._make_signed_request(Methods.GET.value, APICategories.ORDERS.value + '/historical/batch', '')
 
     def _create_buy_market_order_gbp(self, product, amount):
         assert type(product) == GBPProducts
@@ -77,7 +76,10 @@ class CoinbaseService:
                 }
             }
         })
-        return self.make_signed_request(Methods.POST.value, APICategories.ORDERS.value, payload)
+        response = self._make_signed_request(Methods.POST.value, APICategories.ORDERS.value, payload)
+        if not response.get("success"):
+            raise Exception("Purchase unsuccessful: " + response.get("error_response").get("message"), response)
+        return response
 
     def _create_sell_market_order_gbp(self, product, amount):
         assert type(product) == GBPProducts
@@ -91,7 +93,10 @@ class CoinbaseService:
                 }
             }
         })
-        return self.make_signed_request(Methods.POST.value, APICategories.ORDERS.value, payload)
+        response = self._make_signed_request(Methods.POST.value, APICategories.ORDERS.value, payload)
+        if not response.get("success"):
+            raise Exception("Sale unsuccessful: " + response.get("error_response").get("message"), response)
+        return response
 
     def sell_btc_for_gbp(self, amount):
         """
@@ -140,3 +145,4 @@ class CoinbaseService:
         :return: response from Coinbase API
         """
         return self._create_buy_market_order_gbp(GBPProducts.ADA, amount)
+

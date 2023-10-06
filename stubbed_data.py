@@ -300,3 +300,6 @@ orders = json.dumps({'cursor': '',
                                          'trigger_status': 'INVALID_ORDER_TYPE',
                                          'user_id': '0ad12a7e-147a-5672-9b22-9171a5c0762d'}],
                              'sequence': '0'})
+
+buy_success_response = {'success': True, 'failure_reason': 'UNKNOWN_FAILURE_REASON', 'order_id': 'f52de846-f0b7-40e8-9030-f1c11297e6cf', 'success_response': {'order_id': 'f52de846-f0b7-40e8-9030-f1c11297e6cf', 'product_id': 'BTC-GBP', 'side': 'BUY', 'client_order_id': '5b3dbb1f65594977aa042013ec5150d5'}, 'order_configuration': {'market_market_ioc': {'quote_size': '1'}}}
+buy_failure_response = {'success': False, 'failure_reason': 'UNKNOWN_FAILURE_REASON', 'order_id': '', 'error_response': {'error': 'INSUFFICIENT_FUND', 'message': 'Insufficient balance in source account', 'error_details': '', 'preview_failure_reason': 'PREVIEW_INSUFFICIENT_FUND'}, 'order_configuration': {'market_market_ioc': {'quote_size': '100'}}}
