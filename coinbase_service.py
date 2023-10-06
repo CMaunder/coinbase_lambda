@@ -7,8 +7,6 @@ import os
 from enum import Enum
 import uuid
 
-import stubbed_data
-
 
 class Sides(Enum):
     SELL = 'SELL'
@@ -145,4 +143,3 @@ class CoinbaseService:
         :return: response from Coinbase API
         """
         return self._create_buy_market_order_gbp(GBPProducts.ADA, amount)
-
